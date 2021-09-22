@@ -1,0 +1,74 @@
+@page "/selfintro"
+@using Microsoft.Extensions.Configuration
+@using System.IO
+@inject NavigationManager MyNavigationManager
+@inject IConfiguration Configuration
+@inject IJSRuntime jsRuntime
+<h1 class="center">Welcome@(String.IsNullOrEmpty(_userName)?"":" ")@_userName!</h1>
+@foreach ((string teamName, List<(string, string, string)> subSelfIntroList) in _selfIntroList)
+{
+    <h2 class="center"> @teamName </h2>
+    foreach ((string teammateUserName, string teammateUserPhotoUrl, string content) in subSelfIntroList)
+    {
+        <div class="profile">
+            <img class="avatar" src="@teammateUserPhotoUrl" />
+            <div class="info">
+                <h3>@teammateUserName</h3>
+                <p>@content</p>
+            </div>
+        </div>
+    }
+}
+@code {
+    TeamsFx _teamsFx;
+    string _clientId, _endpoint;
+    string _userName;
+    string _userId;
+    List<(string, List<(string, string, string)> subSelfIntroList)> _selfIntroList = new();
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        try
+        {
+            if (firstRender)
+            {
+                _teamsFx = await TeamsFx.CreateTeamsFx(jsRuntime);
+                _clientId = Configuration.GetValue<string>("CLIENT_ID");
+                _endpoint = MyNavigationManager.BaseUri;
+                await _teamsFx.Init(_clientId, _endpoint, _endpoint);
+                var user = await _teamsFx.GetInfoAsync();
+                _userName = user.DisplayName;
+                _userId = user.ObjectId;
+                var graphClient = _teamsFx.GetGraphServiceClient();
+                var resultList = SimpleDatabase.GetSelfIntroList(_userId);
+                string curTeamId = null;
+                string curTeamName = null;
+                List<(string teammateUserName, string teammateUserPhotoUrl, string content)> subSelfIntroList = null;
+                foreach ((string teamId, string teammateUserId, string content) in resultList)
+                {
+                    if (curTeamId != teamId)
+                    {
+                        if (subSelfIntroList is not null)
+                        {
+                            _selfIntroList.Add((curTeamName, subSelfIntroList));
+                        }
+                        curTeamId = teamId;
+                        curTeamName = SimpleDatabase.GetTeamName(teamId);
+                        subSelfIntroList = new();
+                    }
+                    (string teammateUserName, string teammateUserPhotoUrl) = await SimpleGraphClient.GetUserNamePhotoUrl
+                    (
+                    graphClient,
+                    teammateUserId
+                    );
+                    subSelfIntroList.Add((teammateUserName, teammateUserPhotoUrl, content));
+                }
+                if (subSelfIntroList is not null)
+                {
+                    _selfIntroList.Add((curTeamName, subSelfIntroList));
+                }
+                StateHasChanged();
+            }
+        }
+        catch (Exception) { }
+    }
+}

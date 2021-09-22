@@ -1,0 +1,14 @@
+[
+    {
+        "title": "Prepare Development Environment",
+        "content": "Usually, we use <a href=\"https://code.visualstudio.com/learn/get-started/basics\" target=\"_blank\">VS Code</a> as IDE and <a href=\"https://www.typescriptlang.org/docs/handbook/typescript-from-scratch.html\" target=\"_blank\">TypeScript</a> as programming language. Follow the tutorials in the link to get started."
+    },
+    {
+        "title": "Get Access to Azure Resources",
+        "content": "Go to the <a href=\"https://myaccess/identityiq/accessRequest/accessRequest.jsf#/accessRequestSelf/add\" target=\"_blank\">link</a> here. Search for \"<b>TM-teamscloud</b>\" by keywords, select it and submit your request. It may take a day or two for the request to take effect."
+    },
+    {
+        "title": "Get Familiar With What We Do",
+        "content": "Watch the <a href=\"https://microsoftapc.sharepoint.com/teams/DevDivTeamsDevXProductTeam/Shared%20Documents/Forms/AllItems.aspx?id=%2Fteams%2FDevDivTeamsDevXProductTeam%2FShared%20Documents%2FGet%20Started%2FTeams%20dev%20experience%20overview%2Emp4&parent=%2Fteams%2FDevDivTeamsDevXProductTeam%2FShared%20Documents%2FGet%20Started\" target=\"_blank\">video</a> here to know how to develop a Teams App. You may also read the documents in the <a href=\"https://docs.microsoft.com/en-us/microsoftteams/platform/overview\" target=\"_blank\">link</a>. Follow the tutorial above and try to build and run a Teams App by yourself."
+    }
+]

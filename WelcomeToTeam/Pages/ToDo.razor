@@ -1,0 +1,115 @@
+@page "/todo"
+@using Microsoft.Extensions.Configuration
+@using System.Collections
+@using System.IO
+@using Newtonsoft.Json
+@inject NavigationManager MyNavigationManager
+@inject IConfiguration Configuration
+@inject IJSRuntime jsRuntime
+@if (!String.IsNullOrEmpty(_userName))
+{
+    <h1>@_userName's To-Do List</h1>
+}
+@{
+    string curTeamId = null;
+}
+@for (int i = 0; i < _numToDo; ++i)
+{
+    int j = i;
+    (string teamId, int value, string title, string content) = _toDoList[j];
+    if (curTeamId != teamId)
+    {
+        string teamName = _teamIdToTeamName[teamId];
+        curTeamId = teamId;
+        <h2>@teamName</h2>
+        if (_ownedTeamIdSet.Contains(teamId))
+        {
+            string k = teamId;
+            <InputFile
+    OnChange="async (e)=>{string json=await new StreamReader(e.File.OpenReadStream()).ReadToEndAsync(); UpdateToDoList(k, json);}" />
+        }
+    }
+    <hr />
+    <p>
+        <input type="checkbox" checked="@_flagArray[j]"
+        @onchange="e=>{_flagArray[j]=(bool)e.Value;UpdateToDoUserValue(j);}" />
+        @if (_flagArray[j])
+        {
+            <del>@title</del>
+        }
+        else
+        {
+            @title
+        }
+    </p>
+    <p>
+        @((MarkupString)(content))
+    </p>
+}
+@code {
+    TeamsFx _teamsFx;
+    string _clientId, _endpoint;
+    string _userName;
+    string _userId;
+    List<(string teamId, int value, string title, string content)> _toDoList;
+    int _numToDo;
+    bool[] _flagArray;
+    Dictionary<string, string> _teamIdToTeamName;
+    HashSet<string> _ownedTeamIdSet;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        try
+        {
+            if (firstRender)
+            {
+                _teamsFx = await TeamsFx.CreateTeamsFx(jsRuntime);
+                _clientId = Configuration.GetValue<string>("CLIENT_ID");
+                _endpoint = MyNavigationManager.BaseUri;
+                await _teamsFx.Init(_clientId, _endpoint, _endpoint);
+                var user = await _teamsFx.GetInfoAsync();
+                _userName = user.DisplayName;
+                _userId = user.ObjectId;
+                UpdatePage();
+            }
+        }
+        catch (Exception) { }
+    }
+    private void UpdatePage()
+    {
+        _toDoList = SimpleDatabase.GetToDoList(_userId);
+        List<(string teamId, int value)> toDoUserValueList = SimpleDatabase.GetToDoUserValueList(_userId);
+        HashSet<(string teamId, int value)> toDoUserValueSet = new(toDoUserValueList);
+        _numToDo = _toDoList.Count;
+        _flagArray = new bool[_numToDo];
+        _teamIdToTeamName = new();
+        for (int i = 0; i < _numToDo; ++i)
+        {
+            (string teamId, int value, _, _) = _toDoList[i];
+            if (!_teamIdToTeamName.ContainsKey(teamId))
+            {
+                string teamName = SimpleDatabase.GetTeamName(teamId);
+                _teamIdToTeamName.Add(teamId, teamName);
+            }
+            _flagArray[i] = toDoUserValueSet.Contains((teamId, value));
+        }
+        List<string> ownedTeamIdList = SimpleDatabase.GetOwnedTeamIdList(_userId);
+        _ownedTeamIdSet = new HashSet<string>(ownedTeamIdList);
+        StateHasChanged();
+    }
+    private void UpdateToDoUserValue(int i)
+    {
+        (string teamId, int value, _, _) = _toDoList[i];
+        bool flag = _flagArray[i];
+        SimpleDatabase.UpdateToDoUserValue(teamId, _userId, value, flag);
+    }
+    private void UpdateToDoList(string teamId, string json)
+    {
+        SimpleDatabase.ClearToDoList(teamId);
+        List<ToDoItem> toDoItemList = JsonConvert.DeserializeObject<List<ToDoItem>>(json);
+        foreach (var toDoItem in toDoItemList)
+        {
+            SimpleDatabase.UpdateToDoList(teamId, toDoItem.Title, toDoItem.Content);
+        }
+        UpdatePage();
+    }
+}
