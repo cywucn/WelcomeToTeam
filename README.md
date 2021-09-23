@@ -1,8 +1,32 @@
-
-
 ### WelcomeToTeam
 
 #### How to Use
+
+The newcomer does **NOT** need to do the procedures below, which are relatively complicated. Only the one who knows how to use Microsoft Teams and wants to equip his/her team with this app needs to do the following. **Newcomers are NOT expected to know anything to use the app.** This app is completely **newcomer-friendly**.
+
+##### 0. Configure SSO for bot
+
+This step is **necessary** because SSO for bot is only possible for those who have already installed this app as a **personal** app.
+
+In the "**Apps**" menu, click "**Upload a custom app**":
+
+![image-20210923165015980](README.assets/image-20210923165015980.png)
+
+Select the `.zip` file contained in the repository.
+
+![image-20210923165134434](README.assets/image-20210923165134434.png)
+
+Add the app.
+
+![image-20210923165209645](README.assets/image-20210923165209645.png)
+
+After adding the app, text the bot "**SSO**".
+
+![image-20210923165345959](README.assets/image-20210923165345959.png)
+
+Then allow the app to sign in on behalf of you. If you receive a bot message "**SSO is configured.**", it means that this step is successful.
+
+![image-20210923165712441](README.assets/image-20210923165712441.png)
 
 ##### 1. Upload It to Your Team
 
