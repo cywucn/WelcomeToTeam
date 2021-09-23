@@ -193,13 +193,14 @@ namespace WelcomeToTeam
                             Wrap = true
                         }
                     );
+                    string dateTimeStr = (new DateTime(commentList[i].time, DateTimeKind.Utc)).ToString("s") + 'Z';
                     adaptiveColumn.Items.Add
                     (
                         new AdaptiveTextBlock()
                         {
                             Spacing = AdaptiveSpacing.None,
                             IsSubtle = true,
-                            Text = (new DateTime(commentList[i].time)).ToString(),
+                            Text = $"{{{{DATE({dateTimeStr})}}}} {{{{TIME({dateTimeStr})}}}}",
                             Wrap = true
                         }
                     );

@@ -198,7 +198,7 @@ namespace WelcomeToTeam
             command.Parameters.AddWithValue("$teamId", teamId);
             command.Parameters.AddWithValue("$userId", userId);
             command.Parameters.AddWithValue("$commentUserId", commentUserId);
-            command.Parameters.AddWithValue("$time", DateTime.Now.Ticks);
+            command.Parameters.AddWithValue("$time", DateTime.UtcNow.Ticks);
             command.Parameters.AddWithValue("$submission", submission);
             command.ExecuteNonQuery();
         }

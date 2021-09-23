@@ -1,5 +1,7 @@
 .vs
 bin
 obj
+Properties/PublishProfiles
+Properties/ServiceDependencies
 WelcomeToTeam.csproj.user
 WelcomeToTeam.db
