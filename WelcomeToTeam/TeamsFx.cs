@@ -38,21 +38,24 @@ namespace WelcomeToTeam
             return user;
         }
 
-        public GraphServiceClient GetGraphServiceClient()
+        public async Task<GraphServiceClient> GetGraphServiceClient()
         {
-            var client = new GraphServiceClient(new DelegateAuthenticationProvider(async (r) =>
+            var accessToken = await GetAuthenticationToken();
+            if (accessToken is null)
             {
-                var accessToken = await GetAuthenticationToken();
-                if (accessToken == null)
-                {
-                    accessToken = await GetAuthenticationToken();
-                }
-                if (accessToken == null)
-                {
-                    throw new UnauthorizedAccessException();
-                }
-                r.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken.Token);
-            }));
+                return null;
+            }
+            var client = new GraphServiceClient
+            (
+                new DelegateAuthenticationProvider
+                (
+                    (r) =>
+                    {
+                        r.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken.Token);
+                        return Task.CompletedTask;
+                    }
+                )
+            );
             return client;
         }
 

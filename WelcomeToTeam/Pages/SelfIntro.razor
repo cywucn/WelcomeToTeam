@@ -38,7 +38,12 @@
                 var user = await _teamsFx.GetInfoAsync();
                 _userName = user.DisplayName;
                 _userId = user.ObjectId;
-                var graphClient = _teamsFx.GetGraphServiceClient();
+                StateHasChanged();
+                var graphClient = await _teamsFx.GetGraphServiceClient();
+                if (graphClient is null)
+                {
+                    return;
+                }
                 var resultList = SimpleDatabase.GetSelfIntroList(_userId);
                 string curTeamId = null;
                 string curTeamName = null;
