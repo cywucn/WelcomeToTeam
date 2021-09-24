@@ -106,7 +106,7 @@ namespace WelcomeToTeam
 
             return Task.CompletedTask;
         }
-
+        private const int _sendToDoMillisecondsDelay = 10000;
         private AdaptiveCard OnSubmitSelfIntro(ITurnContext<IInvokeActivity> turnContext, object data, CancellationToken cancellationToken)
         {
             SelfIntroCardSubmitData selfIntroCardSubmitData = JsonConvert.DeserializeObject<SelfIntroCardSubmitData>(data.ToString());
@@ -114,11 +114,28 @@ namespace WelcomeToTeam
             string teamId = selfIntroCardSubmitData.TeamId;
             SimpleDatabase.UpdateSelfIntro(teamId, userId, selfIntroCardSubmitData.Submission);
 
+
             string serviceUrl = turnContext.Activity.ServiceUrl;
             (string ssoConversationId, string ssoUserTeamsId) = SimpleDatabase.GetSSOConversationIdUserTeamsId();
             if (ssoConversationId is not null)
             {
                 _ = SimpleMessenger.StartDialog(teamId, userId, ssoConversationId, ssoUserTeamsId, serviceUrl, _adapter, _conversationState, _dialog, _appId, cancellationToken);
+            }
+
+            (string teamConversationId, string teamActivityId) = SimpleDatabase.GetSelfIntroConversationActivityId(teamId, userId);
+            if (teamConversationId is null)
+            {
+                string conversationId = turnContext.Activity.Conversation.Id;
+                Task.Delay(_sendToDoMillisecondsDelay, cancellationToken).ContinueWith
+                    (
+                    t =>
+                    {
+                        IMessageActivity message = (IMessageActivity)SimpleCard.Message(SimpleCard.ToDoCard(userId));
+                        message.Text = "There are some To-Dos that you might want to check out.";
+                        _ = SimpleMessenger.SendMessage(conversationId, serviceUrl, message, _adapter, _appId, cancellationToken);
+                    }
+                    , cancellationToken
+                    );
             }
 
             return SimpleCard.SelfIntroCompleteCard(teamId);
