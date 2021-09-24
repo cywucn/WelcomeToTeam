@@ -74,7 +74,7 @@ namespace WelcomeToTeam
             }
             catch (Exception)
             {
-                await _module.InvokeVoidAsync("popupLoginPage");
+                _ = _module.InvokeVoidAsync("popupLoginPage");
                 return null;
             }
             return token;
